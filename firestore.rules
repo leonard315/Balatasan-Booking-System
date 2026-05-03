@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- HELPER FUNCTIONS ---
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Direct check for admin privileges. 
+    // We avoid recursion by not calling isAdmin() inside the roles_admin match block for 'get'
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'admin@gmail.com' || 
+        exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))
+      );
+    }
+
+    // --- COLLECTION RULES ---
+
+    // Public catalog (Read) - Admin (Write)
+    match /rooms/{roomId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /tours/{tourId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Global access to bookings for admins (Support for Collection Group Queries)
+    match /{path=**}/bookings/{bookingId} {
+      allow read, write: if isAdmin();
+    }
+
+    // User-specific booking rules
+    match /users/{userId}/bookings/{bookingId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow create: if isSignedIn() && request.auth.uid == userId && request.resource.data.userId == userId;
+      allow update, delete: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Admin role management
+    match /roles_admin/{adminId} {
+      // Allow any signed in user to 'get' this to support the exists() check in isAdmin()
+      // without causing recursive rule evaluation.
+      allow get: if isSignedIn();
+      
+      // Other operations require full admin or master admin
+      allow list: if isAdmin();
+      allow create: if isSignedIn() && (request.auth.token.email == 'admin@gmail.com' && request.auth.uid == adminId);
+      allow update, delete: if isSignedIn() && request.auth.token.email == 'admin@gmail.com';
+    }
+  }
+}

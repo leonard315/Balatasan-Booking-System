@@ -1,0 +1,81 @@
+
+"use client";
+
+import Image from "next/image";
+import { Clock, ArrowRight, Eye, Timer } from "lucide-react";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+
+interface TourCardProps {
+  tour: {
+    id: string;
+    title?: string;
+    name?: string;
+    pricePerPerson?: number;
+    price?: number;
+    duration: string;
+    imageUrl: string;
+    description: string;
+  };
+}
+
+export function TourCard({ tour }: TourCardProps) {
+  const displayTitle = tour.title || tour.name || "Tour Experience";
+  
+  // Specific logic for Jet Ski and Flying Fish
+  const isFlyingFish = displayTitle.toLowerCase().includes("flying fish");
+  const isJetSki = displayTitle.toLowerCase().includes("jet ski");
+  
+  const defaultRate = isJetSki ? 150 : (isFlyingFish ? 500 : 1000);
+  const rate = tour.pricePerPerson ?? tour.price ?? defaultRate;
+  const unitLabel = isJetSki ? "min" : "pax";
+
+  return (
+    <Card className="overflow-hidden group hover:shadow-lg transition-all duration-300 border-none bg-white rounded-2xl">
+      <div className="relative h-48 w-full overflow-hidden">
+        <Image
+          src={tour.imageUrl || "https://picsum.photos/seed/tour/600/400"}
+          alt={displayTitle}
+          fill
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        />
+        <Badge className="absolute top-4 left-4 bg-[#6FDDC2] text-[#006D6B] hover:bg-[#6FDDC2]/90 border-none font-semibold px-3 py-1 rounded-full">
+          Adventure
+        </Badge>
+      </div>
+      <CardHeader className="pt-6 pb-2">
+        <h3 className="font-headline text-2xl font-bold text-slate-900">{displayTitle}</h3>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-[#12AFAB] text-sm line-clamp-2">
+          {tour.description}
+        </p>
+        <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center gap-2 text-[#12AFAB]">
+            {isJetSki ? <Timer className="h-5 w-5" /> : <Clock className="h-5 w-5" />}
+            <span className="font-medium">{tour.duration}</span>
+          </div>
+          <div className="font-bold text-[#12AFAB] flex items-center gap-1">
+            <span className="text-lg">₱</span>
+            <span>{rate.toLocaleString()} <span className="text-xs text-slate-400 font-normal">/ {unitLabel}</span></span>
+          </div>
+        </div>
+      </CardContent>
+      <CardFooter className="pb-6">
+        <Link href={`/tours/${tour.id}`} className="w-full">
+          <Button 
+            variant="outline" 
+            className="w-full gap-2 border-[#12AFAB]/20 hover:border-[#12AFAB]/50 hover:bg-[#12AFAB]/5 rounded-xl h-12 text-slate-700 font-medium"
+          >
+            <Eye className="h-4 w-4" />
+            Details
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Button>
+        </Link>
+      </CardFooter>
+    </Card>
+  );
+}

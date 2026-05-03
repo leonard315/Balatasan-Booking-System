@@ -1,0 +1,231 @@
+
+{
+  "entities": {
+    "Room": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Room",
+      "type": "object",
+      "description": "Represents a bookable accommodation unit available at Balatasan Beach Resort.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Room entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the room or accommodation type (e.g., 'Cottage', 'Glamping Tent')."
+        },
+        "price": {
+          "type": "number",
+          "description": "The nightly price of the room in local currency."
+        },
+        "capacity": {
+          "type": "string",
+          "description": "The number or range of guests that can be accommodated in the room (e.g., '2' or '10-15')."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL to an image of the room, typically hosted in Firebase Storage.",
+          "format": "uri"
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the room, its amenities, and unique features."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "price",
+        "capacity",
+        "imageUrl",
+        "description"
+      ]
+    },
+    "Tour": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Tour",
+      "type": "object",
+      "description": "Represents a bookable tour package offered by Balatasan Beach Resort.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Tour entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the tour package (e.g., 'Island Hopping', 'Waterfall Expedition')."
+        },
+        "pricePerPerson": {
+          "type": "number",
+          "description": "The price of the tour per person in local currency."
+        },
+        "duration": {
+          "type": "string",
+          "description": "The typical duration of the tour (e.g., 'Half-day', 'Full-day', '3 hours')."
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "pricePerPerson",
+        "duration"
+      ]
+    },
+    "Booking": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Booking",
+      "type": "object",
+      "description": "Represents a guest's reservation for a room or a tour package.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Booking entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the unique identifier of the user who made the booking."
+        },
+        "itemId": {
+          "type": "string",
+          "description": "Reference to the unique identifier of the booked item (Room or Tour)."
+        },
+        "itemName": {
+          "type": "string",
+          "description": "The name of the booked item at the time of booking."
+        },
+        "startDate": {
+          "type": "string",
+          "description": "The start date of the booking.",
+          "format": "date"
+        },
+        "endDate": {
+          "type": "string",
+          "description": "The end date of the booking.",
+          "format": "date"
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the booking (e.g., 'Pending Payment', 'Confirmed', 'Cancelled')."
+        },
+        "totalPrice": {
+          "type": "number",
+          "description": "The total calculated price for the booking."
+        },
+        "guestName": {
+          "type": "string",
+          "description": "The full name of the guest."
+        },
+        "guestCount": {
+          "type": "number",
+          "description": "The number of guests."
+        },
+        "contactNumber": {
+          "type": "string",
+          "description": "The guest's contact number."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp of when the booking was created.",
+          "format": "date-time"
+        },
+        "paymentImageUrl": {
+          "type": "string",
+          "description": "URL of the uploaded proof of payment image.",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "itemId",
+        "startDate",
+        "endDate",
+        "status",
+        "totalPrice",
+        "guestName",
+        "guestCount",
+        "contactNumber",
+        "createdAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/rooms/{roomId}",
+        "definition": {
+          "entityName": "Room",
+          "schema": {
+            "$ref": "#/backend/entities/Room"
+          },
+          "description": "Publicly accessible collection for all bookable rooms.",
+          "params": [
+            {
+              "name": "roomId",
+              "description": "The unique identifier for a specific room."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/tours/{tourId}",
+        "definition": {
+          "entityName": "Tour",
+          "schema": {
+            "$ref": "#/backend/entities/Tour"
+          },
+          "description": "Publicly accessible collection for all bookable tour packages.",
+          "params": [
+            {
+              "name": "tourId",
+              "description": "The unique identifier for a specific tour package."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/bookings/{bookingId}",
+        "definition": {
+          "entityName": "Booking",
+          "schema": {
+            "$ref": "#/backend/entities/Booking"
+          },
+          "description": "Private collection storing individual booking records specific to each user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "bookingId",
+              "description": "The unique identifier for a specific booking."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{adminId}",
+        "definition": {
+          "entityName": "AdminRole",
+          "schema": {
+            "type": "object"
+          },
+          "description": "Collection for administrator role management.",
+          "params": [
+            {
+              "name": "adminId",
+              "description": "The unique identifier of the user who holds the administrative role."
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
